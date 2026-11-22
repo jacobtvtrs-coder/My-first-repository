@@ -74,7 +74,10 @@ export const RemotionRoot: React.FC = () => {
         height={1920}
         defaultProps={{
           footage: "footage/Charle_riche.1q4r4Pf-UNEcShn3CIk6PDzx_ylwzokU4.mov",
-          beforeStartSec: 4,
+          // Before shots come from a cleaned copy of footage 4s-8s with the
+          // neck strip removed (scripts/remove-neck-strip.py).
+          beforeFootage: "footage/before-clean.mp4",
+          beforeStartSec: 0,
           afterStartSec: 58,
           song: "footage/reference-audio.m4a",
           songVolume: 1,

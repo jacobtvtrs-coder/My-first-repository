@@ -50,6 +50,10 @@ export type BarberCutsProps = {
   // Where in the footage each look starts, in seconds. Pick moments where the
   // head is at the same angle so only the hair seems to change.
   beforeStartSec: number;
+  // Optional separate clip for the BEFORE shots (e.g. with the neck strip
+  // painted out by scripts/remove-neck-strip.py). beforeStartSec is then
+  // measured in this clip instead. Leave empty to use the main footage.
+  beforeFootage: string;
   afterStartSec: number;
   // The only sound in the video: the footage itself stays muted.
   // Song lined up with the cuts (made by scripts/extract-reference-audio.sh).
@@ -65,6 +69,7 @@ export type BarberCutsProps = {
 export const BarberCuts: React.FC<BarberCutsProps> = ({
   footage,
   beforeStartSec,
+  beforeFootage,
   afterStartSec,
   song,
   songVolume,
@@ -73,6 +78,7 @@ export const BarberCuts: React.FC<BarberCutsProps> = ({
 }) => {
   const fps = 30;
   const src = staticFile(footage);
+  const beforeSrc = beforeFootage ? staticFile(beforeFootage) : src;
   // Each look keeps playing from where it left off, instead of freezing.
   const played = { before: 0, after: 0 };
   let from = 0;
@@ -92,7 +98,7 @@ export const BarberCuts: React.FC<BarberCutsProps> = ({
           return (
             <Sequence key={i} from={start} durationInFrames={frames}>
               <OffthreadVideo
-                src={src}
+                src={look === "before" ? beforeSrc : src}
                 trimBefore={trimBefore}
                 muted
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
