@@ -6,6 +6,7 @@ BarberCuts uses for its before shots.
 
 Usage:
   python3 scripts/remove-neck-strip.py <footage.mov> <start_sec> <seconds> <out.mp4> [debug_dir]
+  python3 scripts/remove-neck-strip.py <footage.mov> <start_sec> <seconds> <out.mp4> --plain
 
 Needs: pip install opencv-python-headless, and ffmpeg on PATH.
 """
@@ -92,34 +93,59 @@ def paint_cape(frame: np.ndarray, mask: np.ndarray, rng: np.random.Generator) ->
 def main() -> None:
     src, start, seconds, out = sys.argv[1], float(sys.argv[2]), float(sys.argv[3]), sys.argv[4]
     debug = sys.argv[5] if len(sys.argv) > 5 else None
+    # "--plain": convert only, no strip removal. Used for the AFTER shots so
+    # both looks go through exactly the same color conversion.
+    plain = debug == "--plain"
+    if plain:
+        debug = None
 
-    cap = cv2.VideoCapture(src)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    w, h = int(cap.get(3)), int(cap.get(4))
-    cap.set(cv2.CAP_PROP_POS_FRAMES, round(start * fps))
+    probe = subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
+         "stream=width,height,r_frame_rate", "-of", "csv=p=0", src],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip().split(",")
+    w, h = int(probe[0]), int(probe[1])
+    num, den = probe[2].split("/")
+    fps = int(num) / int(den)
     total = round(seconds * fps)
 
+    # Decode with ffmpeg, the same way Remotion reads the footage for the AFTER
+    # shots. (The phone footage is HDR; OpenCV decodes it brighter and washed
+    # out, which made the BEFORE shots look graded differently.)
+    dec = subprocess.Popen(
+        ["ffmpeg", "-v", "error", "-ss", f"{start:.4f}", "-i", src,
+         "-frames:v", str(total), "-f", "rawvideo", "-pix_fmt", "bgr24", "-"],
+        stdout=subprocess.PIPE,
+    )
+    # Encode as standard BT.709 video and label it so, so it is read back with
+    # exactly the colors that were written.
     enc = subprocess.Popen(
         ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24",
-         "-s", f"{w}x{h}", "-r", str(fps), "-i", "-",
-         "-c:v", "libx264", "-crf", "12", "-preset", "slow", "-pix_fmt", "yuv420p", out],
+         "-s", f"{w}x{h}", "-r", probe[2], "-i", "-",
+         "-vf", "scale=out_color_matrix=bt709:out_range=tv",
+         "-c:v", "libx264", "-crf", "12", "-preset", "slow", "-pix_fmt", "yuv420p",
+         "-colorspace", "bt709", "-color_primaries", "bt709",
+         "-color_trc", "bt709", "-color_range", "tv", out],
         stdin=subprocess.PIPE,
     )
     rng = np.random.default_rng(7)
     areas = []
     for i in range(total):
-        ok, frame = cap.read()
-        if not ok:
+        buf = dec.stdout.read(w * h * 3)
+        if len(buf) < w * h * 3:
             break
-        mask = strip_mask(frame)
+        frame = np.frombuffer(buf, np.uint8).reshape(h, w, 3).copy()
+        mask = np.zeros(frame.shape[:2], np.uint8) if plain else strip_mask(frame)
         areas.append(int(mask.sum()))
-        clean = paint_cape(frame, mask, rng)
+        clean = frame if plain else paint_cape(frame, mask, rng)
         if debug and i % 30 == 0:
             over = frame.copy()
             over[mask > 0] = (0.5 * over[mask > 0] + [0, 0, 127]).astype(np.uint8)
             cv2.imwrite(f"{debug}/mask_{i:03d}.png", over)
             cv2.imwrite(f"{debug}/clean_{i:03d}.png", clean)
         enc.stdin.write(clean.tobytes())
+    dec.stdout.close()
+    dec.wait()
     enc.stdin.close()
     enc.wait()
     print(f"frames={len(areas)} strip area px min={min(areas)} max={max(areas)} median={int(np.median(areas))}")

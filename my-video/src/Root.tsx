@@ -73,7 +73,9 @@ export const RemotionRoot: React.FC = () => {
         width={1080}
         height={1920}
         defaultProps={{
-          footage: "footage/Charle_riche.1q4r4Pf-UNEcShn3CIk6PDzx_ylwzokU4.mov",
+          // AFTER shots: footage 58s-62.2s converted from the phone's HDR the
+          // same way as the BEFORE clips, so all shots share one color grade.
+          footage: "footage/after-sdr.mp4",
           // Before shots come from a cleaned copy of footage 4s-8s with the
           // neck strip removed (scripts/remove-neck-strip.py).
           beforeFootage: "footage/before-clean.mp4",
@@ -83,7 +85,7 @@ export const RemotionRoot: React.FC = () => {
           // joined into one clip, so they don't look like still photos.
           lateBeforeFootage: "footage/before-clean-late.mp4",
           lateBeforeFromShot: 23,
-          afterStartSec: 58,
+          afterStartSec: 0,
           song: "footage/reference-audio.m4a",
           songVolume: 1,
           brightness: 0.85,
