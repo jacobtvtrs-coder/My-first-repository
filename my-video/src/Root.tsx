@@ -4,6 +4,7 @@ import { Logo } from "./HelloWorld/Logo";
 import { Title } from "./HelloWorld/Title";
 import { Cuts, cutsDuration, defaultShots } from "./Cuts";
 import { BarberCuts, barberCutsDuration } from "./BarberCuts";
+import { ClipEdit, CLIP_EDIT_FRAMES } from "./ClipEdit";
 
 // Each <Composition> is an entry in the sidebar!
 
@@ -92,6 +93,21 @@ export const RemotionRoot: React.FC = () => {
           // extra grading is applied here.
           brightness: 1,
           contrast: 1,
+        }}
+      />
+      <Composition
+        // Beat-synced cut of the second haircut clip, with the song from the
+        // audio-source recording. Files come from scripts/fetch-footage.sh;
+        // see scripts/README-clip-edit.md for how they are prepared.
+        id="ClipEdit"
+        component={ClipEdit}
+        durationInFrames={CLIP_EDIT_FRAMES}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{
+          clip: "footage/clip2-sdr.mp4",
+          song: "footage/clip2-song.m4a",
         }}
       />
     </>
