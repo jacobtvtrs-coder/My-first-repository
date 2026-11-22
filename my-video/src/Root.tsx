@@ -88,8 +88,10 @@ export const RemotionRoot: React.FC = () => {
           afterStartSec: 0,
           song: "footage/reference-audio.m4a",
           songVolume: 1,
-          brightness: 0.85,
-          contrast: 1.08,
+          // The HDR conversion already gives the darker, natural look, so no
+          // extra grading is applied here.
+          brightness: 1,
+          contrast: 1,
         }}
       />
     </>

@@ -27,6 +27,14 @@ ALLOWED = np.array(
      (255, 1030), (150, 1030), (40, 800)],
     np.int32,
 )
+# The phone footage is HDR (HLG, BT.2020). Convert it properly to normal video:
+# map the HDR brightness down (tone mapping) and translate the wide-gamut
+# colors, which gives natural, vivid skin tones instead of a flat, dry look.
+HDR_TO_SDR = (
+    "zscale=tin=arib-std-b67:min=bt2020nc:pin=bt2020:rin=tv:t=linear:npl=203,"
+    "format=gbrpf32le,zscale=p=bt709,tonemap=tonemap=hable:desat=0,"
+    "zscale=t=bt709:m=bt709:r=pc"
+)
 # Points that are on the strip; the detected area must touch one of them.
 SEEDS = [(170, 900), (200, 970), (120, 820)]
 
@@ -114,7 +122,8 @@ def main() -> None:
     # out, which made the BEFORE shots look graded differently.)
     dec = subprocess.Popen(
         ["ffmpeg", "-v", "error", "-ss", f"{start:.4f}", "-i", src,
-         "-frames:v", str(total), "-f", "rawvideo", "-pix_fmt", "bgr24", "-"],
+         "-frames:v", str(total), "-vf", HDR_TO_SDR + ",format=bgr24",
+         "-f", "rawvideo", "-pix_fmt", "bgr24", "-"],
         stdout=subprocess.PIPE,
     )
     # Encode as standard BT.709 video and label it so, so it is read back with
