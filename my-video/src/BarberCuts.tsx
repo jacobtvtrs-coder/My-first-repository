@@ -1,6 +1,7 @@
 import React from "react";
 import {
   AbsoluteFill,
+  Audio,
   OffthreadVideo,
   Sequence,
   staticFile,
@@ -26,13 +27,26 @@ export type BarberCutsProps = {
   // head is at the same angle so only the hair seems to change.
   beforeStartSec: number;
   afterStartSec: number;
+  // Song lined up with the cuts (made by scripts/extract-reference-audio.sh).
+  // Leave empty for no song.
+  song: string;
+  songVolume: number;
+  // The footage's own sound, played continuously from the AFTER section.
+  // It sits under the song and comes up for the final hold.
+  originalVolume: number;
+  originalVolumeOnHold: number;
 };
 
 export const BarberCuts: React.FC<BarberCutsProps> = ({
   footage,
   beforeStartSec,
   afterStartSec,
+  song,
+  songVolume,
+  originalVolume,
+  originalVolumeOnHold,
 }) => {
+  const holdStart = barberCutsDuration - SHOT_FRAMES[SHOT_FRAMES.length - 1];
   const fps = 30;
   const src = staticFile(footage);
   // Each look keeps playing from where it left off, instead of freezing.
@@ -59,6 +73,19 @@ export const BarberCuts: React.FC<BarberCutsProps> = ({
           </Sequence>
         );
       })}
+      {song ? <Audio src={staticFile(song)} volume={songVolume} /> : null}
+      <Audio
+        src={src}
+        trimBefore={Math.round(afterStartSec * fps)}
+        volume={(f) =>
+          f < holdStart - 6
+            ? originalVolume
+            : // Short 0.2s ramp up into the final hold.
+              originalVolume +
+              (originalVolumeOnHold - originalVolume) *
+                Math.min(1, (f - (holdStart - 6)) / 6)
+        }
+      />
     </AbsoluteFill>
   );
 };

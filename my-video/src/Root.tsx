@@ -76,6 +76,10 @@ export const RemotionRoot: React.FC = () => {
           footage: "footage/Charle_riche.1q4r4Pf-UNEcShn3CIk6PDzx_ylwzokU4.mov",
           beforeStartSec: 4,
           afterStartSec: 58,
+          song: "footage/reference-audio.m4a",
+          songVolume: 0.6,
+          originalVolume: 1,
+          originalVolumeOnHold: 1,
         }}
       />
     </>
