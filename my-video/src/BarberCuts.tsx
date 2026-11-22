@@ -54,6 +54,12 @@ export type BarberCutsProps = {
   // painted out by scripts/remove-neck-strip.py). beforeStartSec is then
   // measured in this clip instead. Leave empty to use the main footage.
   beforeFootage: string;
+  // The longer BEFORE shots near the end come from a livelier moment, so the
+  // client keeps moving instead of looking like a still photo. BEFORE shots
+  // from shot number lateBeforeFromShot on (counting from 0) play this clip
+  // from its start. Leave empty to keep using beforeFootage.
+  lateBeforeFootage: string;
+  lateBeforeFromShot: number;
   afterStartSec: number;
   // The only sound in the video: the footage itself stays muted.
   // Song lined up with the cuts (made by scripts/extract-reference-audio.sh).
@@ -70,6 +76,8 @@ export const BarberCuts: React.FC<BarberCutsProps> = ({
   footage,
   beforeStartSec,
   beforeFootage,
+  lateBeforeFootage,
+  lateBeforeFromShot,
   afterStartSec,
   song,
   songVolume,
@@ -79,8 +87,9 @@ export const BarberCuts: React.FC<BarberCutsProps> = ({
   const fps = 30;
   const src = staticFile(footage);
   const beforeSrc = beforeFootage ? staticFile(beforeFootage) : src;
+  const lateSrc = lateBeforeFootage ? staticFile(lateBeforeFootage) : null;
   // Each look keeps playing from where it left off, instead of freezing.
-  const played = { before: 0, after: 0 };
+  const played = { before: 0, after: 0, late: 0 };
   let from = 0;
 
   return (
@@ -89,16 +98,28 @@ export const BarberCuts: React.FC<BarberCutsProps> = ({
         style={{ filter: `brightness(${brightness}) contrast(${contrast})` }}
       >
         {SHOT_FRAMES.map((frames, i) => {
-          const look = i % 2 === 0 ? "after" : "before";
-          const startSec = look === "after" ? afterStartSec : beforeStartSec;
+          const look =
+            i % 2 === 0
+              ? "after"
+              : lateSrc && i >= lateBeforeFromShot
+                ? "late"
+                : "before";
+          const startSec =
+            look === "after"
+              ? afterStartSec
+              : look === "late"
+                ? 0
+                : beforeStartSec;
           const trimBefore = Math.round(startSec * fps) + played[look];
           played[look] += frames;
+          const shotSrc =
+            look === "after" ? src : look === "late" ? lateSrc! : beforeSrc;
           const start = from;
           from += frames;
           return (
             <Sequence key={i} from={start} durationInFrames={frames}>
               <OffthreadVideo
-                src={look === "before" ? beforeSrc : src}
+                src={shotSrc}
                 trimBefore={trimBefore}
                 muted
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}

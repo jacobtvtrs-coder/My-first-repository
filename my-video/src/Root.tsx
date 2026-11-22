@@ -78,6 +78,11 @@ export const RemotionRoot: React.FC = () => {
           // neck strip removed (scripts/remove-neck-strip.py).
           beforeFootage: "footage/before-clean.mp4",
           beforeStartSec: 0,
+          // Last three BEFORE shots (23, 25, 27) use moments where the client
+          // moves his head (footage 16.9s, 0.3s and 3.55s, strip removed),
+          // joined into one clip, so they don't look like still photos.
+          lateBeforeFootage: "footage/before-clean-late.mp4",
+          lateBeforeFromShot: 23,
           afterStartSec: 58,
           song: "footage/reference-audio.m4a",
           songVolume: 1,
