@@ -11,10 +11,34 @@ import {
 // a 0.1s strobe that slows down and ends on a held AFTER shot.
 // Shot lengths (in frames at 30fps) were measured from the reference edit.
 export const SHOT_FRAMES = [
-  3, 3, 3, 3, 3, 3, 3, 3, 3, 3, // strobe: 0.1s per shot
-  4, 4, 4,
-  5, 5, 5, 5, 5,
-  6, 7, 7, 8, 9, 12, 13, 15, 12, 18,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3,
+  3, // strobe: 0.1s per shot
+  4,
+  4,
+  4,
+  5,
+  5,
+  5,
+  5,
+  5,
+  6,
+  7,
+  7,
+  8,
+  9,
+  12,
+  13,
+  15,
+  12,
+  18,
   34, // final hold on the finished cut
 ];
 
@@ -32,6 +56,10 @@ export type BarberCutsProps = {
   // Leave empty for no song.
   song: string;
   songVolume: number;
+  // Look of the footage: 1 = unchanged. Lower brightness is darker;
+  // a little extra contrast keeps the darker image crisp instead of muddy.
+  brightness: number;
+  contrast: number;
 };
 
 export const BarberCuts: React.FC<BarberCutsProps> = ({
@@ -40,6 +68,8 @@ export const BarberCuts: React.FC<BarberCutsProps> = ({
   afterStartSec,
   song,
   songVolume,
+  brightness,
+  contrast,
 }) => {
   const fps = 30;
   const src = staticFile(footage);
@@ -49,24 +79,28 @@ export const BarberCuts: React.FC<BarberCutsProps> = ({
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
-      {SHOT_FRAMES.map((frames, i) => {
-        const look = i % 2 === 0 ? "after" : "before";
-        const startSec = look === "after" ? afterStartSec : beforeStartSec;
-        const trimBefore = Math.round(startSec * fps) + played[look];
-        played[look] += frames;
-        const start = from;
-        from += frames;
-        return (
-          <Sequence key={i} from={start} durationInFrames={frames}>
-            <OffthreadVideo
-              src={src}
-              trimBefore={trimBefore}
-              muted
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          </Sequence>
-        );
-      })}
+      <AbsoluteFill
+        style={{ filter: `brightness(${brightness}) contrast(${contrast})` }}
+      >
+        {SHOT_FRAMES.map((frames, i) => {
+          const look = i % 2 === 0 ? "after" : "before";
+          const startSec = look === "after" ? afterStartSec : beforeStartSec;
+          const trimBefore = Math.round(startSec * fps) + played[look];
+          played[look] += frames;
+          const start = from;
+          from += frames;
+          return (
+            <Sequence key={i} from={start} durationInFrames={frames}>
+              <OffthreadVideo
+                src={src}
+                trimBefore={trimBefore}
+                muted
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            </Sequence>
+          );
+        })}
+      </AbsoluteFill>
       {song ? <Audio src={staticFile(song)} volume={songVolume} /> : null}
     </AbsoluteFill>
   );
