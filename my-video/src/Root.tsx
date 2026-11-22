@@ -2,6 +2,7 @@ import { Composition, Folder } from "remotion";
 import { HelloWorld } from "./HelloWorld";
 import { Logo } from "./HelloWorld/Logo";
 import { Title } from "./HelloWorld/Title";
+import { Cuts, cutsDuration, defaultShots } from "./Cuts";
 
 // Each <Composition> is an entry in the sidebar!
 
@@ -50,7 +51,17 @@ export const RemotionRoot: React.FC = () => {
           titleColor: "#000000",
         }}
       />
-
+      <Composition
+        // Vertical 9:16 video made only of hard cuts.
+        // Render it with: npx remotion render Cuts
+        id="Cuts"
+        component={Cuts}
+        durationInFrames={cutsDuration(defaultShots)}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ shots: defaultShots }}
+      />
     </>
   );
 };
