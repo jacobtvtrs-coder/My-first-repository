@@ -3,6 +3,7 @@ import { HelloWorld } from "./HelloWorld";
 import { Logo } from "./HelloWorld/Logo";
 import { Title } from "./HelloWorld/Title";
 import { Cuts, cutsDuration, defaultShots } from "./Cuts";
+import { BarberCuts, barberCutsDuration } from "./BarberCuts";
 
 // Each <Composition> is an entry in the sidebar!
 
@@ -61,6 +62,21 @@ export const RemotionRoot: React.FC = () => {
         width={1080}
         height={1920}
         defaultProps={{ shots: defaultShots }}
+      />
+      <Composition
+        // Before/after hard-cut barber edit. Needs the footage downloaded first:
+        // scripts/fetch-footage.sh, then: npx remotion render BarberCuts
+        id="BarberCuts"
+        component={BarberCuts}
+        durationInFrames={barberCutsDuration}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{
+          footage: "footage/Charle_riche.1q4r4Pf-UNEcShn3CIk6PDzx_ylwzokU4.mov",
+          beforeStartSec: 4,
+          afterStartSec: 58,
+        }}
       />
     </>
   );
