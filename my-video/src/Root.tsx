@@ -5,6 +5,7 @@ import { Title } from "./HelloWorld/Title";
 import { Cuts, cutsDuration, defaultShots } from "./Cuts";
 import { BarberCuts, barberCutsDuration } from "./BarberCuts";
 import { ClipEdit, CLIP_EDIT_FRAMES } from "./ClipEdit";
+import { VlogEdit, loadVlogEdit } from "./VlogEdit";
 
 // Each <Composition> is an entry in the sidebar!
 
@@ -109,6 +110,18 @@ export const RemotionRoot: React.FC = () => {
           clip: "footage/clip2-sdr.mp4",
           song: "footage/clip2-song.m4a",
         }}
+      />
+      <Composition
+        // Barbershop conversation edit with subtitles. Shot list, subtitles
+        // and length come from public/footage/vlog/edit.json (not in git).
+        id="VlogEdit"
+        component={VlogEdit}
+        durationInFrames={30}
+        fps={30}
+        width={1080}
+        height={1920}
+        defaultProps={{ segments: [], captions: {} }}
+        calculateMetadata={loadVlogEdit}
       />
     </>
   );
