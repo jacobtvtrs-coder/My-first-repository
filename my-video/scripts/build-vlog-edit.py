@@ -56,7 +56,7 @@ SHOTS = [
     ("IMG_3065", 434.20, 437.70, "in", "cut"),
     ("IMG_3065", 452.40, 454.10, "none", "cut"),
     ("IMG_3066", 11.30, 17.70, "in", "cut"),
-    ("IMG_3066", 19.60, 20.80, "punch", "cut"),
+    ("IMG_3066", 19.60, 20.80, "none", "cut"),  # he leans out to the side: no zoom
     ("IMG_3066", 39.80, 43.40, "none", "cut"),
     ("IMG_3066", 45.10, 48.10, "out", "cut"),
     # The cut from every angle

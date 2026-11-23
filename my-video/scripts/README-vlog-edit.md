@@ -16,3 +16,11 @@ python3 scripts/clean-vlog-audio.py      # denoise + silence between speech
 python3 scripts/build-vlog-edit.py       # shot list + subtitles -> edit.json
 npx remotion render VlogEdit out/vlog-edit.mp4
 ```
+
+Finally, bring the sound to Instagram's loudness (-14 LUFS) without re-encoding
+the picture (two-pass `loudnorm`; see the commands used in the session):
+
+```bash
+ffmpeg -i out/vlog-edit.mp4 -c:v copy -af "loudnorm=I=-14:TP=-1.5:LRA=11:<measured values>:linear=true" \
+  -c:a aac -b:a 256k -movflags +faststart out/vlog-edit-final.mp4
+```
