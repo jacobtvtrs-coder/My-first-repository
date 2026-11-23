@@ -8,6 +8,7 @@ import {
   Audio,
   Easing,
   OffthreadVideo,
+  Sequence,
   interpolate,
   staticFile,
   useCurrentFrame,
@@ -23,7 +24,9 @@ import type { CalculateMetadataFunction } from "remotion";
 export const FPS = 30;
 const TRANSITION_FRAMES = 8;
 
-type Zoom = "none" | "in" | "out" | "punch";
+// "jump": slightly closer framing, used on every other piece of a jump cut
+// (where a pause was cut out) so the cut reads as intentional.
+type Zoom = "none" | "in" | "out" | "punch" | "jump";
 type Transition = "cut" | "fade" | "slide";
 
 export type Segment = {
@@ -43,6 +46,8 @@ export type VlogEditProps = {
   segments: Segment[];
   // Subtitles per clip, in that clip's own time.
   captions: Record<string, Caption[]>;
+  // Sound effects placed at an edit-time frame (e.g. the suspense build-up).
+  sfx?: { file: string; fromFrame: number; volume?: number }[];
 };
 
 export const loadVlogEdit: CalculateMetadataFunction<
@@ -131,7 +136,9 @@ const Shot: React.FC<{ seg: Segment; captions: Caption[] }> = ({
         ? 1.14 - 0.14 * ease
         : seg.zoom === "punch"
           ? 1.32
-          : 1;
+          : seg.zoom === "jump"
+            ? 1.1
+            : 1;
   const clipSec = seg.inSec + frame / FPS;
   const src = `footage/vlog/${seg.clip}`;
   return (
@@ -159,8 +166,29 @@ const Shot: React.FC<{ seg: Segment; captions: Caption[] }> = ({
   );
 };
 
-export const VlogEdit: React.FC<VlogEditProps> = ({ segments, captions }) => {
+export const VlogEdit: React.FC<VlogEditProps> = ({
+  segments,
+  captions,
+  sfx,
+}) => {
   if (!segments?.length) return <AbsoluteFill style={{ background: "#000" }} />;
+  return (
+    <AbsoluteFill>
+      <Shots segments={segments} captions={captions} />
+      {(sfx ?? []).map((s, i) => (
+        <Sequence key={i} from={s.fromFrame}>
+          {/* sits under the voices */}
+          <Audio src={staticFile(s.file)} volume={s.volume ?? 0.45} />
+        </Sequence>
+      ))}
+    </AbsoluteFill>
+  );
+};
+
+const Shots: React.FC<Pick<VlogEditProps, "segments" | "captions">> = ({
+  segments,
+  captions,
+}) => {
   return (
     <TransitionSeries>
       {segments.flatMap((seg, i) => {
