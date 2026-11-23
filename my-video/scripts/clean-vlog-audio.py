@@ -22,6 +22,9 @@ VOICE_DB = -36  # louder than this (after denoise) counts as voice/laugh
 KEEP_GAP = 0.45  # pauses shorter than this inside speech are kept
 PAD_BEFORE, PAD_AFTER = 0.10, 0.20
 FADE = 0.03
+# Clips with music playing in the room: loudness can't tell voice from music,
+# so only the transcribed words open the gate (music is muted between them).
+WORDS_ONLY = {"IMG_3066"}
 
 # Remove rumble/hum below 80Hz, gentle broadband noise reduction, then make
 # the voice a little clearer and keep peaks under control.
@@ -65,11 +68,12 @@ def main():
         loud = np.convolve(db, np.ones(5) / 5, "same") > VOICE_DB
 
         words = []
-        tj = f"public/footage/vlog-audio/{name}.json"
-        if os.path.exists(tj):
-            for s in json.load(open(tj))["segments"]:
-                words += [(w["start"], w["end"]) for w in s["words"]]
-        active = loud | mask_from(words, n)
+        for tj in (f"public/footage/vlog-audio/{name}.json", f"public/footage/vlog-audio/{name}.es.json"):
+            if os.path.exists(tj):
+                data = json.load(open(tj))
+                for seg in data["segments"] if isinstance(data, dict) else data:
+                    words += [(w["start"], w["end"]) for w in seg["words"]]
+        active = mask_from(words, n) if name in WORDS_ONLY else loud | mask_from(words, n)
 
         # merge short gaps, drop tiny blips, then pad
         regions = to_regions(active)
