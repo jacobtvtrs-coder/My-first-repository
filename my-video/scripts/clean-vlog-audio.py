@@ -26,13 +26,20 @@ FADE = 0.03
 # so only the transcribed words open the gate (music is muted between them).
 WORDS_ONLY = {"IMG_3066"}
 
-# Remove rumble/hum below 80Hz, gentle broadband noise reduction, then make
-# the voice a little clearer and keep peaks under control.
-FILTER = ("highpass=f=80,afftdn=nf=-45:nr=14:tn=1,"
+# Remove rumble/hum below 80Hz, light noise reduction (the voices-only track
+# is already clean), then make the voice a little clearer and keep peaks under
+# control.
+FILTER = ("highpass=f=80,afftdn=nf=-50:nr=8:tn=1,"
           "equalizer=f=3000:t=q:w=1.2:g=2,acompressor=threshold=-20dB:ratio=2.5:attack=8:release=120")
 
 
 def load(path: str) -> np.ndarray:
+    # Prefer the voices-only track from isolate-voices.py when it exists, so
+    # music and background sounds are gone even underneath the talking.
+    name = os.path.basename(path).split(".")[0]
+    voice = f"public/footage/vlog-audio/{name}.voice.wav"
+    if os.path.exists(voice):
+        path = voice
     raw = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-af", FILTER, "-ac", "1",
                           "-ar", str(SR), "-f", "f32le", "-"], capture_output=True, check=True).stdout
     return np.frombuffer(raw, np.float32).copy()

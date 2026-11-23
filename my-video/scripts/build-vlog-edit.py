@@ -19,28 +19,34 @@ SHOTS = [
     # Cold open: the reaction, as a hook
     ("IMG_3066", 37.55, 39.70, "punch", "cut"),
     # Setup
-    ("IMG_3065", 24.85, 30.45, "in", "fade"),
-    # The Spanish attempt: just the beginning
-    ("IMG_3065", 41.00, 45.00, "none", "cut"),
-    ("IMG_3065", 58.45, 64.70, "in", "cut"),
-    ("IMG_3065", 65.90, 66.75, "punch", "cut"),
+    ("IMG_3065", 24.85, 33.20, "in", "fade"),
     # How long have they known each other
-    ("IMG_3065", 121.55, 128.10, "in", "fade"),
+    ("IMG_3065", 121.55, 131.20, "in", "fade"),
     # The wife found the barbershop
     ("IMG_3065", 150.30, 154.05, "none", "fade"),
-    ("IMG_3065", 163.75, 167.15, "in", "cut"),
-    ("IMG_3065", 168.35, 169.45, "none", "cut"),
+    ("IMG_3065", 157.25, 161.70, "in", "cut"),
+    ("IMG_3065", 162.55, 169.45, "none", "cut"),
     ("IMG_3065", 178.05, 179.95, "punch", "cut"),
+    ("IMG_3065", 180.30, 182.35, "none", "cut"),
     # "It's a script" / "this is real"
     ("IMG_3065", 191.55, 196.85, "out", "cut"),
+    # His mechanic shop, 10 years, the party
+    ("IMG_3065", 201.40, 207.60, "in", "fade"),
+    ("IMG_3065", 212.50, 218.70, "none", "cut"),
     # Why he keeps coming back
-    ("IMG_3065", 235.30, 239.45, "in", "fade"),
+    ("IMG_3065", 233.70, 244.70, "in", "fade"),
     ("IMG_3065", 254.25, 257.40, "none", "cut"),
     ("IMG_3065", 259.80, 262.80, "in", "cut"),
-    # The word hunt
-    ("IMG_3065", 289.35, 294.25, "none", "fade"),
+    # The wedding
+    ("IMG_3065", 280.65, 282.45, "none", "fade"),
+    ("IMG_3065", 284.20, 286.75, "in", "cut"),
+    ("IMG_3065", 289.35, 294.25, "none", "cut"),
     ("IMG_3065", 296.10, 297.00, "punch", "cut"),
     ("IMG_3065", 299.25, 303.30, "in", "cut"),
+    ("IMG_3065", 312.05, 316.60, "none", "cut"),
+    ("IMG_3065", 316.70, 321.05, "in", "cut"),
+    ("IMG_3065", 321.90, 323.65, "none", "cut"),
+    ("IMG_3065", 329.35, 332.75, "in", "cut"),
     # Bloopers
     ("IMG_3065", 344.85, 351.30, "none", "fade"),
     ("IMG_3065", 354.90, 355.90, "punch", "cut"),
@@ -82,7 +88,8 @@ SUSPENSE_HIT = ("IMG_3066", 11.30)
 FIXES = {"Moldière.": "Molière.", "estiliste.": "styliste.", "estiliste,": "styliste,",
          "llegas": "llevas", "llegas?": "llevas?", "llegas,": "llevas,", "conmigo?": "conmigo?",
          "table,": "taper,", "J?": "Jay?", "G?": "Jay?", "Cabelo.": "Cabello.",
-         "Coche": "Corte", "cabelo.": "cabello."}
+         "Coche": "Corte", "cabelo.": "cabello.",
+         "Repentini.": "Repentigny.", "Repentini,": "Repentigny,"}
 DROP = re.compile(r"^(Deo\??|Si|se|encana,|Scrop|scrop|de|don\.?|don,|non,)$")
 DROP_RANGES = {"IMG_3065": [(76.0, 77.0), (296.95, 301.10)]}  # unclear words
 # Faces sit in the upper-middle of these shots; zoom towards them.
