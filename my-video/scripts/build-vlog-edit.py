@@ -27,7 +27,7 @@ SHOTS = [
     ("IMG_3065", 157.25, 161.70, "in", "cut"),
     ("IMG_3065", 162.55, 169.45, "none", "cut"),
     ("IMG_3065", 178.05, 179.95, "punch", "cut"),
-    ("IMG_3065", 180.30, 182.35, "none", "cut"),
+    ("IMG_3065", 180.30, 182.25, "none", "cut"),
     # "It's a script" / "this is real"
     ("IMG_3065", 191.55, 196.85, "out", "cut"),
     # His mechanic shop, 10 years, the party
@@ -166,6 +166,10 @@ def lines_for(clip, ws, a, b):
         else:
             fixed.append(ln)
     lines = fixed
+
+    # a shot that starts mid-sentence still starts its subtitle with a capital
+    if lines and lines[0][0]["word"][:1].islower():
+        lines[0][0] = {**lines[0][0], "word": lines[0][0]["word"][0].upper() + lines[0][0]["word"][1:]}
 
     caps = []
     for i, ln in enumerate(lines):
